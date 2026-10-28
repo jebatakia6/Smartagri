@@ -1,0 +1,19 @@
+# ==================================================
+# .gitignore — IoT Smart Soil Analysis System
+# ==================================================
+
+# NEVER commit secrets or credentials
+.env
+*.env.local
+
+# Python venv
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# SQLite database (contains real data — don't commit)
+soil_data.db
+
+# macOS system files
+.DS_Store

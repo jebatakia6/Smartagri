@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- SEO Best Practices -->
+  <title>Smart Soil Analysis & AI Crop Recommendation Dashboard</title>
+  <meta name="description"
+    content="A state-of-the-art interactive agronomy IoT telemetry dashboard combining smart sensing nodes and AI crop recommendation system.">
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
+
+  <!-- Tailwind CSS Play CDN (Highly powerful v3 framework utility) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              DEFAULT: '#10b981',
+              hover: '#059669',
+              light: '#ecfdf5',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- High-Performance Interactive Charts: Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Custom Dashboard Aesthetic overrides (Glassmorphism, Google Fonts, Shimmers) -->
+  <link rel="stylesheet" href="src/styles/index.css">
+</head>
+
+<body class="bg-[var(--bg-primary)] text-[var(--text-main)] transition-smooth min-h-screen">
+
+  <!-- Core SPA Shell Layout Grid -->
+  <div id="app-shell" style="display:none;" class="min-h-screen flex flex-col md:flex-row">
+
+    <!-- Collapsible Sticky Sidebar Navigation Container -->
+    <aside id="app-sidebar-container"></aside>
+
+    <!-- Main Window Workspace Layout -->
+    <div class="flex-1 flex flex-col min-h-screen min-w-0">
+
+      <!-- Sticky Top Navbar Container -->
+      <header id="app-navbar-container"></header>
+
+      <!-- Dynamic Page Content Canvas -->
+      <main id="app-page-workspace"
+        class="flex-1 px-6 py-6 sm:px-8 sm:py-8 lg:px-12 lg:py-8 overflow-y-auto max-w-7xl w-full mx-auto"></main>
+
+    </div>
+
+  </div>
+
+  <!-- Isolated Fullscreen Auth/Login Shell Container -->
+  <div id="auth-shell" style="display:none;" class="min-h-screen w-full flex items-center justify-center"></div>
+
+  <!-- Isolated Landing Page Shell Container -->
+  <div id="landing-shell" class="min-h-screen w-full flex flex-col"></div>
+
+  <!-- ========================================== -->
+  <!-- TELEMETRY & SPA SCRIPT INJECTIONS -->
+  <!-- ========================================== -->
+
+  <!-- 1. Shared Infrastructure Utilities -->
+  <script src="src/utils/i18n.js"></script>
+  <script src="src/utils/state.js"></script>
+  <script src="src/utils/mockData.js"></script>
+  <!-- 1b. Backend API Client (connects to Flask on port 5000) -->
+  <script src="src/utils/api.js"></script>
+
+  <!-- 2. Reusable Layout UI Components -->
+  <script src="src/components/Sidebar.js"></script>
+  <script src="src/components/Navbar.js"></script>
+  <script src="src/components/Toast.js"></script>
+  <script src="src/components/Modal.js"></script>
+
+  <!-- 3. Dynamic Page View Templates -->
+  <script src="src/pages/Landing.js"></script>
+  <script src="src/pages/Login.js"></script>
+  <script src="src/pages/Register.js"></script>
+  <script src="src/pages/Dashboard.js"></script>
+  <script src="src/pages/Monitoring.js"></script>
+  <script src="src/pages/Recommendation.js"></script>
+  <script src="src/pages/Fertilizer.js"></script>
+  <script src="src/pages/Alerts.js"></script>
+  <script src="src/pages/History.js"></script>
+  <script src="src/pages/Weather.js"></script>
+  <script src="src/pages/Settings.js"></script>
+  <!-- 3b. Backend Integration Test Panel (new page, no existing files modified) -->
+  <script src="src/pages/TestPanel.js"></script>
+
+  <!-- 4. SPA Router & App Controller Glue -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const appShell = document.getElementById("app-shell");
+      const authShell = document.getElementById("auth-shell");
+      const landingShell = document.getElementById("landing-shell");
+      const sidebarContainer = document.getElementById("app-sidebar-container");
+      const navbarContainer = document.getElementById("app-navbar-container");
+      const pageWorkspace = document.getElementById("app-page-workspace");
+
+      // ====================================================
+      // 🪄 BACK BUTTON MAGIC
+      // When the user clicks browser back button from any page,
+      // they will always land on the home/landing page.
+      // ====================================================
+      // Push a "sentinel" entry so there's always something to go back to within the app
+      // The initial replaceState in state.js sets #landing
+      // Then on popstate, we redirect to landing
+      window.addEventListener('popstate', () => {
+        // Whenever back is pressed anywhere in the app → go home!
+        window.appState.setPage('landing', false);
+        // Re-push landing so back can be pressed again gracefully
+        window.history.pushState({ page: 'landing' }, '', '#landing');
+      });
+
+      // Core Dynamic Router
+      function appRouter() {
+        const activeTab = window.appState.activePage;
+        const loggedIn = window.appState.isLoggedIn;
+
+        // Clean up landing state subscription if moving away from landing
+        if (landingShell && landingShell.unsubFromState && activeTab !== 'landing') {
+          landingShell.unsubFromState();
+          landingShell.unsubFromState = null;
+        }
+
+        // Redirect if not logged in and not on public pages
+        if (!loggedIn && activeTab !== 'login' && activeTab !== 'landing' && activeTab !== 'register') {
+          window.appState.activePage = 'landing';
+          appRouter();
+          return;
+        }
+
+        // 1. Toggle Layout Containers based on active page
+        // Use style.display to avoid Tailwind hidden+flex class conflicts
+        if (activeTab === 'landing') {
+          appShell.style.display = 'none';
+          authShell.style.display = 'none';
+          landingShell.style.display = 'flex';
+          landingShell.style.flexDirection = 'column';
+          landingShell.classList.add('fade-in');
+
+          window.renderLandingPage(landingShell);
+        } else if (activeTab === 'login') {
+          appShell.style.display = 'none';
+          landingShell.style.display = 'none';
+          authShell.style.display = 'flex';
+          authShell.classList.add('fade-in');
+
+          window.renderLoginPage(authShell);
+        } else if (activeTab === 'register') {
+          appShell.style.display = 'none';
+          landingShell.style.display = 'none';
+          authShell.style.display = 'flex';
+          authShell.classList.add('fade-in');
+
+          window.renderRegisterPage(authShell);
+        } else {
+          authShell.style.display = 'none';
+          landingShell.style.display = 'none';
+          // Clear inline style so Tailwind's "flex flex-col md:flex-row" classes 
+          // can control the responsive direction (sidebar left, content right on desktop)
+          appShell.style.display = '';
+          appShell.style.flexDirection = '';
+          appShell.classList.add('fade-in');
+
+          // Render Shared Layout Frames
+          window.renderSidebar(sidebarContainer);
+          window.renderNavbar(navbarContainer);
+
+          // Reset the workspace class names in case they were modified
+          pageWorkspace.className = "flex-1 px-6 py-6 sm:px-8 sm:py-8 lg:px-12 lg:py-8 overflow-y-auto max-w-7xl w-full mx-auto";
+
+          // Clear and create a nested wrapper so layout classes are preserved
+          pageWorkspace.innerHTML = '<div id="page-content-wrapper"></div>';
+          const wrapper = document.getElementById("page-content-wrapper");
+
+          // Render matching modular page view inside the wrapper
+          switch (activeTab) {
+            case 'dashboard':
+              window.renderDashboardPage(wrapper);
+              break;
+            case 'monitoring':
+              window.renderMonitoringPage(wrapper);
+              break;
+            case 'recommendation':
+              window.renderRecommendationPage(wrapper);
+              break;
+            case 'fertilizer':
+              window.renderFertilizerPage(wrapper);
+              break;
+            case 'alerts':
+              window.renderAlertsPage(wrapper);
+              break;
+            case 'history':
+              window.renderHistoryPage(wrapper);
+              break;
+            case 'weather':
+              window.renderWeatherPage(wrapper);
+              break;
+            case 'settings':
+              window.renderSettingsPage(wrapper);
+              break;
+            case 'testpanel':
+              window.renderTestPanelPage(wrapper);
+              break;
+            default:
+              window.renderDashboardPage(wrapper);
+          }
+        }
+      }
+
+      // Initial routing paint
+      appRouter();
+
+      // Subscribe to central state changes for reactive rendering
+      window.appState.subscribe((event, data) => {
+        if (event === 'pageChange') {
+          appRouter();
+        }
+        else if (event === 'languageChange' || event === 'themeChange') {
+          // Instantly repaint frames and page views on language/theme shift!
+          const activeTab = window.appState.activePage;
+          if (activeTab === 'landing') {
+            window.renderLandingPage(landingShell);
+          } else if (activeTab === 'login') {
+            window.renderLoginPage(authShell);
+          } else if (activeTab === 'register') {
+            window.renderRegisterPage(authShell);
+          } else {
+            window.renderSidebar(sidebarContainer);
+            window.renderNavbar(navbarContainer);
+
+            // Re-render active subview to reflect translated copy/theme adjustments
+            appRouter();
+          }
+        }
+        else if (event === 'alertsUpdate') {
+          // Update notification counts in Sidebar & Navbar instantly when feeds update!
+          if (window.appState.activePage !== 'login' && window.appState.activePage !== 'landing') {
+            window.renderSidebar(sidebarContainer);
+            window.renderNavbar(navbarContainer);
+          }
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>

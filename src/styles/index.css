@@ -1,0 +1,218 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
+
+/* Dynamic Theme Custom Properties */
+:root {
+  --font-heading: 'Outfit', 'Hind Siliguri', sans-serif;
+  --font-body: 'Inter', 'Hind Siliguri', sans-serif;
+
+  /* Light Theme Variables (Earthy, Green, Crisp) */
+  --bg-primary: #f0f4f1;
+  --bg-secondary: #ffffff;
+  --bg-sidebar: #1b382b;
+  --text-sidebar-active: #10b981;
+  --bg-card: rgba(255, 255, 255, 0.7);
+  --border-card: rgba(16, 185, 129, 0.15);
+  --text-main: #1f2937;
+  --text-muted: #6b7280;
+  
+  --color-brand: #10b981;
+  --color-brand-hover: #059669;
+  --color-brand-light: #ecfdf5;
+  --color-accent: #0284c7; /* AI/IoT feel */
+  
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-info: #3b82f6;
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+  --shadow-glow: 0 0 15px rgba(16, 185, 129, 0.2);
+  
+  --glass-blur: 12px;
+}
+
+:root.dark {
+  /* Dark Theme Variables (Glowing Agritech, Emerald Glass) */
+  --bg-primary: #0a0f0d;
+  --bg-secondary: #0d1512;
+  --bg-sidebar: #060b09;
+  --text-sidebar-active: #34d399;
+  --bg-card: rgba(13, 21, 18, 0.6);
+  --border-card: rgba(52, 211, 153, 0.1);
+  --text-main: #f3f4f6;
+  --text-muted: #9ca3af;
+  
+  --color-brand: #34d399;
+  --color-brand-hover: #10b981;
+  --color-brand-light: rgba(52, 211, 153, 0.1);
+  --color-accent: #38bdf8;
+  
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-danger: #f87171;
+  --color-info: #60a5fa;
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+  --shadow-glow: 0 0 20px rgba(52, 211, 153, 0.15);
+}
+
+/* Global Styles */
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+}
+
+/* Smooth Transitions & Micro-Interactions */
+.transition-smooth {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Custom Glassmorphism Styles */
+.glass-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--border-card);
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
+  transform: translateY(-2px);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.dark .glass-card:hover {
+  border-color: rgba(52, 211, 153, 0.25);
+}
+
+/* Custom Sidebar Item Hover Styles */
+.sidebar-link {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.sidebar-link::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 4px;
+  background-color: var(--color-brand);
+  transform: scaleY(0);
+  transition: transform 0.2s ease;
+}
+
+.sidebar-link.active::before {
+  transform: scaleY(1);
+}
+
+/* Glow Pulses for IoT Connection */
+@keyframes online-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+.status-pulse-online {
+  animation: online-pulse 2s infinite;
+}
+
+/* Custom Scrollbar for modern dashboards */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-card);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-brand);
+}
+
+/* NPK Progress Circles helper styling */
+.radial-progress {
+  transform: rotate(-90deg);
+}
+
+/* Shimmer Loading Skeleton Animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, 
+    rgba(16, 185, 129, 0.05) 25%, 
+    rgba(16, 185, 129, 0.12) 37%, 
+    rgba(16, 185, 129, 0.05) 63%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.dark .skeleton-shimmer {
+  background: linear-gradient(90deg, 
+    rgba(52, 211, 153, 0.02) 25%, 
+    rgba(52, 211, 153, 0.08) 37%, 
+    rgba(52, 211, 153, 0.02) 63%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Auth Page split design background overlay */
+.bg-agritech-pattern {
+  background-image: 
+    linear-gradient(rgba(27, 56, 43, 0.85), rgba(6, 11, 9, 0.95)), 
+    url('https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&q=80&w=1200');
+  background-size: cover;
+  background-position: center;
+}
+
+/* Page transitions */
+.fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
